@@ -1,0 +1,17 @@
+{
+  "name": "studio-shop-backend",
+  "version": "2.0.0",
+  "description": "Backend for the studio art portfolio + shop site: product catalogue, print variants, orders, and a small admin panel. Uses Turso (hosted SQLite) so it survives free-tier hosting restarts.",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js"
+  },
+  "dependencies": {
+    "@libsql/client": "^0.14.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}
