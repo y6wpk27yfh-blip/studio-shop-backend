@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0a0a0a; --ink-2:#141414; --panel:#1a1a1a;
+    --paper:#f5f5f3; --dim:#9a9a97; --line:rgba(245,245,243,.12);
+    --line-strong:rgba(245,245,243,.28); --accent:#ffffff;
+    --danger:#e05c4f; --ok:#5fbf83;
+    font-family:'Inter',sans-serif;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{ background:var(--ink); color:var(--paper); min-height:100vh; }
+  a{ color:inherit; }
+  input, select, textarea, button{ font-family:inherit; font-size:14px; color:var(--paper); }
+  input, select, textarea{
+    background:var(--ink-2); border:1px solid var(--line); border-radius:4px;
+    padding:8px 10px; width:100%;
+  }
+  input:focus, select:focus, textarea:focus{ outline:1px solid var(--line-strong); }
+  label{ display:block; font-size:11px; letter-spacing:.06em; text-transform:uppercase; color:var(--dim); margin-bottom:5px; }
+  .field{ margin-bottom:12px; }
+  button{
+    cursor:pointer; border:1px solid var(--line-strong); background:none;
+    padding:9px 16px; border-radius:4px; letter-spacing:.03em; transition:.2s;
+  }
+  button:hover{ background:var(--paper); color:var(--ink); }
+  button.primary{ background:var(--paper); color:var(--ink); }
+  button.primary:hover{ opacity:.85; background:var(--paper); }
+  button.danger{ border-color:var(--danger); color:var(--danger); }
+  button.danger:hover{ background:var(--danger); color:#fff; }
+  button.ghost{ border-color:transparent; padding:6px 8px; }
+  button:disabled{ opacity:.4; cursor:not-allowed; }
+
+  #login{ min-height:100vh; display:flex; align-items:center; justify-content:center; }
+  #login .box{ width:320px; padding:32px; border:1px solid var(--line); border-radius:8px; background:var(--panel); }
+  #login h1{ font-size:18px; margin-bottom:20px; font-weight:600; }
+  #login .err{ color:var(--danger); font-size:13px; margin-top:10px; min-height:16px; }
+
+  #app{ display:none; max-width:1100px; margin:0 auto; padding:28px 20px 80px; }
+  header.top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; }
+  header.top h1{ font-size:20px; font-weight:600; }
+  .tabs{ display:flex; gap:8px; margin-bottom:22px; }
+  .tabs button{ padding:8px 16px; }
+  .tabs button.active{ background:var(--paper); color:var(--ink); }
+
+  .panel{ background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:20px; margin-bottom:20px; }
+  .panel h2{ font-size:15px; font-weight:600; margin-bottom:16px; }
+  .row{ display:flex; gap:12px; }
+  .row > *{ flex:1; }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .grid3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
+  th{ color:var(--dim); font-weight:500; letter-spacing:.04em; text-transform:uppercase; font-size:11px; }
+  tr:last-child td{ border-bottom:none; }
+
+  .badge{ display:inline-block; font-size:11px; padding:2px 8px; border:1px solid var(--line-strong); border-radius:20px; text-transform:uppercase; letter-spacing:.04em; }
+  .badge.sold{ border-color:var(--danger); color:var(--danger); }
+  .badge.available{ border-color:var(--ok); color:var(--ok); }
+  .badge.reserved{ border-color:#e0c04f; color:#e0c04f; }
+
+  .artwork-card{ border:1px solid var(--line); border-radius:6px; padding:16px; margin-bottom:14px; }
+  .artwork-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:12px; }
+  .artwork-head h3{ font-size:15px; margin-bottom:4px; }
+  .artwork-head .meta{ color:var(--dim); font-size:12px; }
+  .artwork-actions{ display:flex; gap:8px; flex-shrink:0; }
+  .variants{ margin-top:14px; border-top:1px solid var(--line); padding-top:12px; }
+  .variant-row{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:8px; align-items:center; margin-bottom:8px; font-size:13px; }
+  .variant-row input{ padding:6px 8px; }
+  .add-variant{ display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:8px; margin-top:10px; }
+
+  .msg{ font-size:13px; margin-top:8px; min-height:16px; }
+  .msg.ok{ color:var(--ok); }
+  .msg.err{ color:var(--danger); }
+  .thumb{ width:56px; height:56px; border-radius:4px; background-size:cover; background-position:center; flex-shrink:0; border:1px solid var(--line); }
+  .toggle-published{ font-size:12px; color:var(--dim); display:flex; align-items:center; gap:6px; }
+  details > summary{ cursor:pointer; color:var(--dim); font-size:12px; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h1>Studio Admin</h1>
+    <div class="field">
+      <label for="pw">Admin password</label>
+      <input id="pw" type="password" autocomplete="current-password">
+    </div>
+    <button class="primary" id="login-btn" style="width:100%">Log in</button>
+    <div class="err" id="login-err"></div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="top">
+    <h1>Studio Admin</h1>
+    <button class="ghost" id="logout-btn">Log out</button>
+  </header>
+
+  <div class="tabs">
+    <button id="tab-artworks" class="active">Artworks</button>
+    <button id="tab-orders">Orders</button>
+  </div>
+
+  <section id="view-artworks">
+    <div class="panel">
+      <h2>Add new artwork</h2>
+      <div class="grid3">
+        <div class="field"><label>ID (slug, no spaces)</label><input id="new-id" placeholder="coastal-drift"></div>
+        <div class="field"><label>Title</label><input id="new-title" placeholder="Coastal Drift"></div>
+        <div class="field"><label>Type</label>
+          <select id="new-type">
+            <option value="original">Original only</option>
+            <option value="print">Print only</option>
+            <option value="both">Original + Print</option>
+          </select>
+        </div>
+      </div>
+      <div class="grid3">
+        <div class="field"><label>Medium</label><input id="new-medium" placeholder="Oil on canvas, 24x30in"></div>
+        <div class="field"><label>Year</label><input id="new-year" type="number" placeholder="2026"></div>
+        <div class="field"><label>Original price (USD, if applicable)</label><input id="new-price" type="number" step="0.01" placeholder="850.00"></div>
+      </div>
+      <div class="field"><label>Description</label><textarea id="new-desc" rows="2"></textarea></div>
+      <button class="primary" id="add-artwork-btn">Add artwork</button>
+      <div class="msg" id="add-artwork-msg"></div>
+    </div>
+
+    <div id="artworks-list"></div>
+  </section>
+
+  <section id="view-orders" style="display:none">
+    <div class="panel">
+      <h2>Orders</h2>
+      <table id="orders-table">
+        <thead><tr><th>ID</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th><th>Placed</th></tr></thead>
+        <tbody id="orders-tbody"></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>
