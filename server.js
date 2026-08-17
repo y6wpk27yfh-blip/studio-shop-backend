@@ -3,7 +3,6 @@ require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-
 const { requireAdmin } = require('./adminAuth');
 const productsRouter = require('./routes/products');
 const ordersRouter = require('./routes/orders');
@@ -24,7 +23,6 @@ async function start() {
   }
 
   const app = express();
-
   const corsOrigin = process.env.CORS_ORIGIN || '*';
   app.use(cors({ origin: corsOrigin === '*' ? true : corsOrigin.split(',').map(s => s.trim()) }));
   app.use(express.json());
@@ -39,8 +37,8 @@ async function start() {
   // Admin API - everything else in routes/admin.js, all protected
   app.use('/api/admin', requireAdmin, adminRouter);
 
-  // Admin panel static page
-  app.use('/admin', express.static(path.join(__dirname, 'public')));
+  // Admin panel static page - serves admin.html by default at /admin
+  app.use('/admin', express.static(path.join(__dirname, 'public'), { index: 'admin.html' }));
 
   app.get('/', (req, res) => {
     res.send('Studio shop backend is running. Admin panel: /admin — API: /api/products');
