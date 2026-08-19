@@ -146,7 +146,15 @@
         <input id="p-sort_order" type="number" step="1" value="0">
       </div>
     </div>
-    <label>Background (CSS gradient — shown as artwork placeholder)</label>
+    <label>Product photo</label>
+    <div id="photo-preview-wrap" style="margin-bottom:10px;">
+      <img id="p-photo-preview" style="display:none; max-width:200px; max-height:200px; border-radius:8px; border:1px solid var(--line);">
+    </div>
+    <input type="file" id="p-photo-file" accept="image/*" style="display:none;">
+    <button type="button" class="btn" id="p-photo-btn">Choose / replace photo</button>
+    <span id="p-photo-status" style="font-size:12px; color:var(--paper-dim); margin-left:8px;"></span>
+
+    <label>Background (advanced — CSS gradient; auto-filled when you upload a photo above)</label>
     <input id="p-bg">
     <div style="margin-top:18px; display:flex; gap:10px;">
       <button class="btn primary" id="save-product-btn">Save</button>
@@ -279,10 +287,78 @@
     document.getElementById('p-sort_order').value = product ? product.sort_order : 0;
     document.getElementById('p-bg').value = product ? product.bg : 'linear-gradient(150deg, #1c1c1c, #3a3a3a 60%, #0a0a0a)';
     document.getElementById('product-form-status').textContent = '';
+    document.getElementById('p-photo-status').textContent = '';
+    showPreview(product ? extractPhotoFromBg(product.bg) : null);
     showOnly(productFormScreen);
   }
 
   document.getElementById('cancel-product-btn').addEventListener('click', () => showOnly(adminScreen));
+
+  // ---------- photo upload (compressed, stored as a data URL inside the bg field) ----------
+  const photoFileInput = document.getElementById('p-photo-file');
+  const photoPreview = document.getElementById('p-photo-preview');
+  const photoStatus = document.getElementById('p-photo-status');
+  const bgInput = document.getElementById('p-bg');
+
+  document.getElementById('p-photo-btn').addEventListener('click', () => photoFileInput.click());
+
+  // Pull an existing data-URL photo out of a bg value like: center/cover no-repeat url("data:image/...")
+  function extractPhotoFromBg(bg){
+    if (!bg) return null;
+    const m = bg.match(/url\((['"]?)(data:image\/[^'")]+)\1\)/);
+    return m ? m[2] : null;
+  }
+
+  function showPreview(dataUrl){
+    if (dataUrl) {
+      photoPreview.src = dataUrl;
+      photoPreview.style.display = 'block';
+    } else {
+      photoPreview.style.display = 'none';
+      photoPreview.src = '';
+    }
+  }
+
+  function compressImage(file, maxDim, quality){
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.onload = () => {
+        img.onerror = () => reject(new Error('Could not read image'));
+        img.onload = () => {
+          let { width, height } = img;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) { height = Math.round(height * (maxDim / width)); width = maxDim; }
+            else { width = Math.round(width * (maxDim / height)); height = maxDim; }
+          }
+          const canvas = document.createElement('canvas');
+          canvas.width = width;
+          canvas.height = height;
+          canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+          resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  photoFileInput.addEventListener('change', async () => {
+    const file = photoFileInput.files[0];
+    if (!file) return;
+    photoStatus.textContent = 'Compressing…';
+    try {
+      const dataUrl = await compressImage(file, 1600, 0.82);
+      showPreview(dataUrl);
+      bgInput.value = `center/cover no-repeat url("${dataUrl}")`;
+      const kb = Math.round(dataUrl.length * 0.75 / 1024);
+      photoStatus.textContent = `Ready (~${kb} KB)`;
+    } catch (e) {
+      photoStatus.textContent = 'Could not process that image — try a different photo.';
+    }
+    photoFileInput.value = '';
+  });
 
   document.getElementById('save-product-btn').addEventListener('click', async () => {
     const statusEl = document.getElementById('product-form-status');
