@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio Admin</title>
+<style>
+  :root{
+    --ink:#0a0a0a; --paper:#f5f5f3; --paper-dim:#a8a8a4; --line:#2a2a2a;
+    --accent:#ffffff; --danger:#e05a4e; --success:#4caf7d;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  body{
+    background:var(--ink); color:var(--paper);
+    font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, sans-serif;
+    min-height:100vh;
+  }
+  a{ color:inherit; }
+  .wrap{ max-width:960px; margin:0 auto; padding:24px 20px 80px; }
+  header{ display:flex; align-items:center; justify-content:space-between; margin-bottom:28px; flex-wrap:wrap; gap:12px; }
+  h1{ font-size:20px; font-weight:600; }
+  .btn{
+    background:none; border:1px solid var(--line); color:var(--paper);
+    padding:10px 16px; border-radius:6px; font-size:14px; cursor:pointer;
+  }
+  .btn:hover{ border-color:var(--paper-dim); }
+  .btn.primary{ background:var(--paper); color:var(--ink); border-color:var(--paper); font-weight:600; }
+  .btn.danger{ border-color:var(--danger); color:var(--danger); }
+  .btn:disabled{ opacity:.5; cursor:not-allowed; }
+
+  #login-screen{ max-width:360px; margin:15vh auto 0; text-align:center; }
+  #login-screen h1{ margin-bottom:20px; }
+  input, textarea, select{
+    width:100%; background:#151515; border:1px solid var(--line); color:var(--paper);
+    padding:10px 12px; border-radius:6px; font-size:14px; font-family:inherit;
+  }
+  textarea{ min-height:80px; resize:vertical; }
+  label{ display:block; font-size:12px; color:var(--paper-dim); margin:14px 0 6px; text-transform:uppercase; letter-spacing:.05em; }
+  .field-row{ display:flex; gap:12px; flex-wrap:wrap; }
+  .field-row > div{ flex:1; min-width:140px; }
+
+  .tabs{ display:flex; gap:8px; margin-bottom:24px; border-bottom:1px solid var(--line); }
+  .tab{ padding:10px 16px; cursor:pointer; color:var(--paper-dim); border-bottom:2px solid transparent; }
+  .tab.active{ color:var(--paper); border-color:var(--paper); }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .card{ background:#141414; border:1px solid var(--line); border-radius:10px; padding:18px; margin-bottom:16px; }
+  .product-row{ display:flex; justify-content:space-between; align-items:center; gap:12px; }
+  .product-row .meta{ font-size:13px; color:var(--paper-dim); }
+  .product-actions{ display:flex; gap:8px; }
+  .status-msg{ font-size:13px; margin-top:10px; min-height:18px; }
+  .status-msg.success{ color:var(--success); }
+  .status-msg.error{ color:var(--danger); }
+  .hidden{ display:none !important; }
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th, td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); }
+  .add-btn{ margin-bottom:16px; }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <h1>Studio Admin</h1>
+  <input type="password" id="password-input" placeholder="Admin password" autocomplete="current-password">
+  <button class="btn primary" id="login-btn" style="margin-top:12px; width:100%;">Log in</button>
+  <p class="status-msg" id="login-status"></p>
+</div>
+
+<div class="wrap hidden" id="admin-screen">
+  <header>
+    <h1>Studio Admin</h1>
+    <button class="btn" id="logout-btn">Log out</button>
+  </header>
+
+  <div class="tabs">
+    <div class="tab active" data-tab="products">Products</div>
+    <div class="tab" data-tab="site">Site Content</div>
+    <div class="tab" data-tab="orders">Orders</div>
+  </div>
+
+  <div class="panel active" id="panel-products">
+    <button class="btn primary add-btn" id="add-product-btn">+ Add product</button>
+    <div id="product-list"></div>
+    <p class="status-msg" id="products-status"></p>
+  </div>
+
+  <div class="panel" id="panel-site">
+    <div class="card">
+      <label>Brand name</label>
+      <input id="s-brand_name">
+      <label>Headline (HTML — use &lt;br&gt; for a line break)</label>
+      <input id="s-headline_html">
+      <label>Tagline</label>
+      <input id="s-tagline">
+      <label>Contact email (used for the contact form and checkout)</label>
+      <input id="s-contact_email">
+      <label>Instagram URL</label>
+      <input id="s-instagram_url">
+      <label>About text (HTML — wrap paragraphs in &lt;p&gt;&lt;/p&gt;)</label>
+      <textarea id="s-about_html"></textarea>
+      <button class="btn primary" id="save-site-btn" style="margin-top:16px;">Save changes</button>
+      <p class="status-msg" id="site-status"></p>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-orders">
+    <div class="card">
+      <table id="orders-table">
+        <thead><tr><th>When</th><th>Order</th><th>Total</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <p class="status-msg" id="orders-status"></p>
+    </div>
+  </div>
+</div>
+
+<!-- product edit modal (simple inline form, reused for add/edit) -->
+<div class="wrap hidden" id="product-form-screen">
+  <header><h1 id="product-form-title">Add product</h1></header>
+  <div class="card">
+    <label>Product ID (letters, numbers, dashes — used in the URL, can't be changed later easily)</label>
+    <input id="p-id">
+    <label>Name</label>
+    <input id="p-name">
+    <label>Medium (e.g. "Oil on canvas, 24×30in")</label>
+    <input id="p-medium">
+    <div class="field-row">
+      <div>
+        <label>Type</label>
+        <select id="p-type">
+          <option value="Print">Print (has a price + sizes)</option>
+          <option value="Original">Original (one of a kind)</option>
+        </select>
+      </div>
+      <div>
+        <label>Price (A4 base price, Prints only)</label>
+        <input id="p-price" type="number" step="0.01">
+      </div>
+      <div>
+        <label>Display number (e.g. I, II, III)</label>
+        <input id="p-num">
+      </div>
+      <div>
+        <label>Sort order</label>
+        <input id="p-sort_order" type="number" step="1" value="0">
+      </div>
+    </div>
+    <label>Background (CSS gradient — shown as artwork placeholder)</label>
+    <input id="p-bg">
+    <div style="margin-top:18px; display:flex; gap:10px;">
+      <button class="btn primary" id="save-product-btn">Save</button>
+      <button class="btn" id="cancel-product-btn">Cancel</button>
+    </div>
+    <p class="status-msg" id="product-form-status"></p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const loginScreen = document.getElementById('login-screen');
+  const adminScreen = document.getElementById('admin-screen');
+  const productFormScreen = document.getElementById('product-form-screen');
+
+  function showOnly(el){
+    [loginScreen, adminScreen, productFormScreen].forEach(e => e.classList.add('hidden'));
+    el.classList.remove('hidden');
+  }
+
+  async function api(path, opts){
+    const res = await fetch(path, Object.assign({ headers: { 'Content-Type': 'application/json' } }, opts));
+    if (res.status === 401) { showOnly(loginScreen); throw new Error('Not authenticated'); }
+    return res;
+  }
+
+  // ---------- login ----------
+  const passwordInput = document.getElementById('password-input');
+  const loginBtn = document.getElementById('login-btn');
+  const loginStatus = document.getElementById('login-status');
+
+  async function tryLogin(){
+    loginStatus.textContent = '';
+    const password = passwordInput.value;
+    if (!password) return;
+    loginBtn.disabled = true;
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password })
+      });
+      if (res.ok) {
+        boot();
+      } else {
+        loginStatus.textContent = 'Wrong password.';
+        loginStatus.className = 'status-msg error';
+      }
+    } catch (e) {
+      loginStatus.textContent = 'Could not reach the server.';
+      loginStatus.className = 'status-msg error';
+    } finally {
+      loginBtn.disabled = false;
+    }
+  }
+  loginBtn.addEventListener('click', tryLogin);
+  passwordInput.addEventListener('keydown', e => { if (e.key === 'Enter') tryLogin(); });
+
+  document.getElementById('logout-btn').addEventListener('click', async () => {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    showOnly(loginScreen);
+    passwordInput.value = '';
+  });
+
+  // ---------- tabs ----------
+  document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+      if (tab.dataset.tab === 'orders') loadOrders();
+    });
+  });
+
+  // ---------- products ----------
+  const productList = document.getElementById('product-list');
+  const productsStatus = document.getElementById('products-status');
+  let editingId = null;
+
+  async function loadProducts(){
+    const res = await api('/api/admin/products');
+    const products = await res.json();
+    if (!products.length) {
+      productList.innerHTML = '<p style="color:var(--paper-dim);">No products yet — add your first one above.</p>';
+      return;
+    }
+    productList.innerHTML = products.map(p => `
+      <div class="card product-row" data-id="${escapeHtml(p.id)}">
+        <div>
+          <strong>${escapeHtml(p.name)}</strong>
+          <div class="meta">${escapeHtml(p.type)}${p.type === 'Print' ? ' — $' + Number(p.price).toFixed(2) : ''} · ${escapeHtml(p.medium)}</div>
+        </div>
+        <div class="product-actions">
+          <button class="btn edit-btn">Edit</button>
+          <button class="btn danger delete-btn">Delete</button>
+        </div>
+      </div>
+    `).join('');
+
+    productList.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.addEventListener('click', () => openProductForm(products.find(p => p.id === btn.closest('.product-row').dataset.id)));
+    });
+    productList.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.closest('.product-row').dataset.id;
+        if (!confirm('Delete this product? This cannot be undone.')) return;
+        await api('/api/admin/products/' + encodeURIComponent(id), { method: 'DELETE' });
+        loadProducts();
+      });
+    });
+  }
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  document.getElementById('add-product-btn').addEventListener('click', () => openProductForm(null));
+
+  function openProductForm(product){
+    editingId = product ? product.id : null;
+    document.getElementById('product-form-title').textContent = product ? 'Edit product' : 'Add product';
+    document.getElementById('p-id').value = product ? product.id : '';
+    document.getElementById('p-id').disabled = !!product;
+    document.getElementById('p-name').value = product ? product.name : '';
+    document.getElementById('p-medium').value = product ? product.medium : '';
+    document.getElementById('p-type').value = product ? product.type : 'Print';
+    document.getElementById('p-price').value = product && product.price != null ? product.price : '';
+    document.getElementById('p-num').value = product ? (product.num || '') : '';
+    document.getElementById('p-sort_order').value = product ? product.sort_order : 0;
+    document.getElementById('p-bg').value = product ? product.bg : 'linear-gradient(150deg, #1c1c1c, #3a3a3a 60%, #0a0a0a)';
+    document.getElementById('product-form-status').textContent = '';
+    showOnly(productFormScreen);
+  }
+
+  document.getElementById('cancel-product-btn').addEventListener('click', () => showOnly(adminScreen));
+
+  document.getElementById('save-product-btn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('product-form-status');
+    const body = {
+      id: document.getElementById('p-id').value,
+      name: document.getElementById('p-name').value,
+      medium: document.getElementById('p-medium').value,
+      type: document.getElementById('p-type').value,
+      price: document.getElementById('p-price').value,
+      num: document.getElementById('p-num').value,
+      sort_order: document.getElementById('p-sort_order').value,
+      bg: document.getElementById('p-bg').value,
+    };
+    if (!body.id || !body.name) {
+      statusEl.textContent = 'Product ID and name are required.';
+      statusEl.className = 'status-msg error';
+      return;
+    }
+    try {
+      const method = editingId ? 'PUT' : 'POST';
+      const url = editingId ? '/api/admin/products/' + encodeURIComponent(editingId) : '/api/admin/products';
+      const res = await api(url, { method, body: JSON.stringify(body) });
+      if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+      showOnly(adminScreen);
+      loadProducts();
+    } catch (e) {
+      statusEl.textContent = e.message;
+      statusEl.className = 'status-msg error';
+    }
+  });
+
+  // ---------- site settings ----------
+  async function loadSite(){
+    const res = await api('/api/admin/settings');
+    const site = await res.json();
+    document.getElementById('s-brand_name').value = site.brand_name || '';
+    document.getElementById('s-headline_html').value = site.headline_html || '';
+    document.getElementById('s-tagline').value = site.tagline || '';
+    document.getElementById('s-contact_email').value = site.contact_email || '';
+    document.getElementById('s-instagram_url').value = site.instagram_url || '';
+    document.getElementById('s-about_html').value = site.about_html || '';
+  }
+
+  document.getElementById('save-site-btn').addEventListener('click', async () => {
+    const statusEl = document.getElementById('site-status');
+    const body = {
+      brand_name: document.getElementById('s-brand_name').value,
+      headline_html: document.getElementById('s-headline_html').value,
+      tagline: document.getElementById('s-tagline').value,
+      contact_email: document.getElementById('s-contact_email').value,
+      instagram_url: document.getElementById('s-instagram_url').value,
+      about_html: document.getElementById('s-about_html').value,
+    };
+    try {
+      const res = await api('/api/admin/settings', { method: 'PUT', body: JSON.stringify(body) });
+      if (!res.ok) throw new Error((await res.json()).error || 'Save failed');
+      statusEl.textContent = 'Saved — refresh the live site to see it.';
+      statusEl.className = 'status-msg success';
+    } catch (e) {
+      statusEl.textContent = e.message;
+      statusEl.className = 'status-msg error';
+    }
+  });
+
+  // ---------- orders ----------
+  async function loadOrders(){
+    const tbody = document.querySelector('#orders-table tbody');
+    const statusEl = document.getElementById('orders-status');
+    try {
+      const res = await api('/api/admin/orders');
+      const orders = await res.json();
+      if (!orders.length) {
+        statusEl.textContent = 'No orders recorded yet.';
+        tbody.innerHTML = '';
+        return;
+      }
+      statusEl.textContent = '';
+      tbody.innerHTML = orders.map(o => `
+        <tr>
+          <td>${escapeHtml(o.created_at)}</td>
+          <td>${escapeHtml(o.summary)}</td>
+          <td>$${Number(o.total).toFixed(2)}</td>
+        </tr>
+      `).join('');
+    } catch (e) {
+      statusEl.textContent = 'Could not load orders.';
+    }
+  }
+
+  // ---------- boot ----------
+  async function boot(){
+    const res = await fetch('/api/admin/check');
+    const data = await res.json();
+    if (!data.authenticated) { showOnly(loginScreen); return; }
+    showOnly(adminScreen);
+    loadProducts();
+    loadSite();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
