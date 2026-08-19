@@ -1,64 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Studio — Be Back Soon</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+
+  /* ============================================================
+     EDIT ME — quick reference
+     ------------------------------------------------------------
+     1) Colors & fonts        -> :root variables just below
+     2) Brand name / initials -> search for "EDIT: brand"
+     3) Headline / copy       -> search for "EDIT: copy"
+     4) Social links          -> footer <a> hrefs
+     ============================================================ */
+
+  :root{
+    --ink:      #0a0a0a;   /* near-black ground */
+    --ink-2:    #151515;
+    --paper:    #f5f5f3;   /* off-white */
+    --paper-dim: #a8a8a4;
+    --gold:     #ffffff;   /* accent now pure white */
+    --rust:     #3a3a3a;   /* neutral grey, replaces terracotta in gradients */
+    --sage:     #2a2a2a;   /* neutral grey, replaces green in gradients */
+    --line:     rgba(245,245,243,0.14);
+    --line-strong: rgba(245,245,243,0.32);
+
+    --display: 'Inter', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html{ scroll-behavior:smooth; }
+  body{
+    background:var(--ink);
+    color:var(--paper);
+    font-family:var(--body);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  ::selection{ background:var(--gold); color:var(--ink); }
+  a{ color:inherit; text-decoration:none; }
+  img{ display:block; max-width:100%; }
+
+  :focus-visible{
+    outline:2px solid var(--gold);
+    outline-offset:3px;
+  }
+
+  /* ---------- texture layer (paper grain, no external assets) ---------- */
+  .grain{
+    position:fixed; inset:0; z-index:5; pointer-events:none;
+    opacity:.05; mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:fixed; top:0; left:0; right:0; z-index:20;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    padding:22px clamp(20px,5vw,56px);
+    background:linear-gradient(to bottom, rgba(21,18,13,.85), rgba(21,18,13,0));
+    backdrop-filter:blur(2px);
+  }
+  .brand{ display:flex; align-items:center; gap:10px; justify-self:center; }
+  .brand-logo{
+    height:38px; width:auto;
+  }
+  .brand-mark{
+    width:34px; height:34px; border:1px solid var(--line-strong);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-family:var(--display); font-style:normal; font-weight:500; font-size:15px; color:var(--gold);
+  }
+  .brand-name{
+    font-family:var(--display); font-style:normal; font-size:15px; letter-spacing:.02em;
+    color:var(--paper-dim);
+  }
+  nav.links{ display:none; align-items:center; gap:clamp(18px,3vw,40px); font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+  nav.links a{ color:var(--paper-dim); position:relative; padding-bottom:4px; }
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:0; height:1px; width:0;
+    background:var(--gold); transition:width .35s ease;
+  }
+  nav.links a:hover::after, nav.links a.active::after{ width:100%; }
+  nav.links a.active{ color:var(--paper); }
+  .header-actions{ display:flex; align-items:center; gap:16px; justify-self:end; }
+  .menu-toggle{ justify-self:start; }
+  .cart{ display:flex; align-items:center; gap:6px; }
+  .contact-btn{
+    border:1px solid var(--line-strong); padding:10px 20px;
+    font-size:12px; letter-spacing:.12em; text-transform:uppercase;
+    transition:background .3s ease, color .3s ease;
+    background:none; color:inherit; font-family:inherit; cursor:pointer;
+  }
+  .contact-btn:hover{ background:var(--paper); color:var(--ink); }
+  .menu-toggle{
+    display:block; position:relative; width:22px; height:22px;
+    background:none; border:0; padding:0; cursor:pointer;
+  }
+  .menu-toggle .bar{
+    position:absolute; left:0; width:22px; height:2px; background:var(--paper);
+    transition:transform .35s ease, top .35s ease;
+  }
+  .menu-toggle .bar1{ top:0; }
+  .menu-toggle .bar2{ top:9px; }
+  .menu-toggle .bar3{ top:20px; }
+  .menu-toggle.open .bar1{ top:9px; transform:rotate(45deg); }
+  .menu-toggle.open .bar2{ transform:rotate(-45deg); }
+  .menu-toggle.open .bar3{ /* stays put — underline */ }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative; min-height:100svh; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; text-align:center;
+    padding:140px 20px 80px;
+    overflow:hidden;
+    background:
+      radial-gradient(ellipse 80% 60% at 30% 10%, rgba(255,255,255,.07), transparent 55%),
+      radial-gradient(ellipse 70% 55% at 80% 60%, rgba(255,255,255,.05), transparent 55%),
+      linear-gradient(180deg, var(--ink-2), var(--ink) 45%, var(--ink) 100%);
+  }
+  /* fades the very bottom of the hero into flat black so it blends into the
+     section below with no visible seam/edge */
+  .hero::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:26vh;
+    background:linear-gradient(to bottom, transparent, var(--ink) 80%);
+    pointer-events:none; z-index:1;
+  }
+  .eyebrow{
+    position:relative; z-index:2;
+    font-size:12px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--gold); margin-bottom:22px;
+  }
+
+  .hero-title-row{
+    position:relative; z-index:2;
+    display:flex; align-items:center; justify-content:center;
+    gap:clamp(18px,4vw,48px); flex-wrap:wrap; margin-bottom:26px;
+  }
+
+  .hero-particles{
+    position:absolute; inset:0; width:100%; height:100%;
+    z-index:1; pointer-events:none; border:none; outline:none;
+  }
+
+  h1.headline{
+    position:relative; z-index:2;
+    font-family:var(--body); font-style:normal; font-weight:600;
+    font-size:clamp(4rem, 13vw, 11rem);
+    line-height:.92; letter-spacing:-.01em;
+    color:var(--paper);
+  }
+  h1.headline .italic{ font-style:normal; font-weight:400; color:var(--paper-dim); }
+
+  .hero-tagline{
+    position:relative; z-index:2;
+    font-size:13px; letter-spacing:.28em; text-transform:uppercase;
+    color:var(--gold); margin-top:26px; margin-bottom:16px;
+  }
+
+  .brandmark{
+    font-family:var(--display); font-weight:500; font-style:normal;
+    font-size:clamp(1.6rem, 4.4vw, 3.4rem);
+    line-height:1; letter-spacing:-.01em;
+    color:var(--paper-dim);
+  }
+
+  .sub{
+    position:relative; z-index:2;
+    max-width:520px; margin:0 auto 40px; color:var(--paper-dim);
+    font-size:16px; line-height:1.6; font-style:normal; font-family:var(--body);
+  }
+
+  .scroll-cue{
+    position:absolute; bottom:26px; left:50%; transform:translateX(-50%);
+    font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--paper-dim);
+    display:flex; flex-direction:column; align-items:center; gap:8px; z-index:2;
+  }
+  .scroll-cue .line{ width:1px; height:34px; background:var(--line-strong); position:relative; overflow:hidden; }
+  .scroll-cue .line::after{
+    content:''; position:absolute; top:-100%; left:0; width:100%; height:100%;
+    background:var(--gold); animation:cue 1.8s ease-in-out infinite;
+  }
+  @keyframes cue{ 50%{ top:0; } 100%{ top:100%; } }
+
+  /* ---------- in-hero contact panel ---------- */
+  .hero-content{
+    position:relative; z-index:2; width:100%;
+    transition:opacity .4s ease, transform .4s ease;
+  }
+  .hero-content.is-hidden{
+    display:none;
+  }
+  .contact-panel{
+    position:relative; z-index:2; width:100%;
+    max-width:480px; margin:0 auto;
+    display:none;
+  }
+  .contact-panel.is-visible{ display:block; }
+  .contact-panel .eyebrow{ margin-bottom:18px; }
+  .contact-panel h2{
+    font-family:var(--body); font-weight:600; font-style:normal;
+    text-transform:uppercase; letter-spacing:.1em;
+    font-size:clamp(1.3rem,3.2vw,1.9rem); text-align:center; margin-bottom:14px;
+    color:var(--paper);
+  }
+  .contact-panel .sub{
+    text-align:center; color:var(--paper-dim); font-size:15px; line-height:1.6;
+    max-width:400px; margin:0 auto 40px; font-style:normal; font-family:var(--body);
+  }
+  .contact-panel form{ display:flex; flex-direction:column; gap:20px; text-align:left; }
+  .contact-panel .field{ display:flex; flex-direction:column; gap:8px; }
+  .contact-panel label{
+    font-size:11px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--paper-dim);
+  }
+  .contact-panel input, .contact-panel textarea{
+    background:transparent; border:1px solid var(--line-strong);
+    color:var(--paper); font-family:var(--body); font-size:15px;
+    padding:14px 16px; transition:border-color .25s ease, background .25s ease;
+    width:100%;
+  }
+  .contact-panel input::placeholder, .contact-panel textarea::placeholder{ color:var(--paper-dim); opacity:.6; }
+  .contact-panel input:focus, .contact-panel textarea:focus{
+    border-color:var(--gold); background:rgba(245,245,243,.03);
+  }
+  .contact-panel textarea{ resize:vertical; min-height:100px; font-family:var(--body); }
+  .contact-panel .submit-btn{
+    margin-top:4px; background:var(--paper); color:var(--ink); border:none;
+    padding:16px 20px; font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+    cursor:pointer; transition:opacity .25s ease;
+  }
+  .contact-panel .submit-btn:hover{ opacity:.85; }
+  .contact-panel .submit-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .contact-panel .status-msg{
+    text-align:center; font-size:13px; color:var(--paper-dim);
+    margin-top:16px; min-height:18px;
+  }
+  .contact-panel .status-msg.success{ color:var(--gold); }
+  .contact-panel .status-msg.error{ color:#e08a7a; }
+  .contact-panel .back-to-hero{
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--line-strong); padding:11px 22px; margin-bottom:32px;
+    font-family:var(--body); font-weight:600; font-size:12px;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--paper); background:rgba(10,10,10,.6); backdrop-filter:blur(8px);
+    cursor:pointer; transition:background .3s ease, color .3s ease;
+  }
+  .contact-panel .back-to-hero:hover{ background:var(--paper); color:var(--ink); }
+
+  /* ---------- explore works: instagram-style story stack ---------- */
+  .explore{
+    position:relative; padding:110px clamp(20px,6vw,60px) 130px;
+    text-align:center;
+  }
+  .explore-title{
+    font-family:var(--body); font-weight:600; font-style:normal;
+    text-transform:uppercase; letter-spacing:.16em;
+    font-size:clamp(1.5rem,4vw,2.6rem); color:var(--paper);
+    margin-bottom:16px;
+  }
+  .explore-hint{
+    font-family:var(--body); font-style:normal; font-weight:400;
+    color:var(--paper-dim); font-size:14px; margin-bottom:56px;
+  }
+  .stack-outer{
+    position:relative; width:min(320px,80vw); margin:0 auto;
+  }
+  .stack-peek{
+    position:absolute; inset:0; border-radius:22px;
+    background:linear-gradient(160deg,var(--ink-2),#000);
+    border:1px solid var(--line);
+  }
+  .stack-peek.peek-2{ transform:translateY(26px) scale(.9); opacity:.28; }
+  .stack-peek.peek-1{ transform:translateY(14px) scale(.95); opacity:.55; }
+  .story-stack{
+    position:relative; aspect-ratio:9/13.5; border-radius:22px;
+    overflow:hidden; background:var(--ink-2);
+    border:1px solid var(--line-strong);
+    box-shadow:0 30px 70px rgba(0,0,0,.55);
+    cursor:pointer; -webkit-user-select:none; user-select:none;
+    touch-action:pan-y;
+  }
+  .story-card{
+    position:absolute; inset:0; opacity:0; transform:scale(1.035);
+    transition:opacity .5s ease, transform .7s ease; z-index:1;
+  }
+  .story-card.is-active{ opacity:1; transform:scale(1); z-index:2; }
+  .story-media{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-blend-mode:overlay;
+  }
+  .story-media .num{
+    font-family:var(--display); font-style:normal; font-weight:600;
+    font-size:clamp(3.5rem,16vw,5.5rem); color:rgba(245,245,243,.16);
+    letter-spacing:-.02em;
+  }
+  .story-card::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:44%; z-index:1;
+    background:linear-gradient(to top, rgba(0,0,0,.8), transparent);
+    pointer-events:none;
+  }
+  .story-caption{
+    position:absolute; left:22px; right:22px; bottom:20px; z-index:3; text-align:left;
+  }
+  .story-num{
+    display:block; font-family:var(--display); font-style:normal;
+    color:var(--gold); font-size:12px; letter-spacing:.1em; margin-bottom:5px;
+  }
+  .story-name{
+    font-family:var(--body); font-weight:600; font-size:19px;
+    letter-spacing:.01em; color:var(--paper);
+  }
+  .story-medium{
+    display:block; margin-top:4px; font-size:12px; color:var(--paper-dim);
+    letter-spacing:.04em;
+  }
+
+  /* ---------- portfolio button (between hero and explore) ---------- */
+  .portfolio-cta{
+    display:flex; justify-content:center; padding:64px 20px 8px;
+    gap:16px; flex-wrap:wrap;
+  }
+  .portfolio-btn{
+    position:relative; display:inline-flex; align-items:center; gap:12px;
+    border:1px solid var(--line-strong); padding:17px 42px;
+    font-family:var(--body); font-weight:600; font-size:13px;
+    letter-spacing:.22em; text-transform:uppercase;
+    color:var(--paper); background:none; cursor:pointer;
+    transition:background .3s ease, color .3s ease;
+  }
+  .portfolio-btn:hover{ background:var(--paper); color:var(--ink); }
+  .portfolio-btn svg{ transition:transform .3s ease; }
+  .portfolio-btn:hover svg{ transform:translate(2px,-2px); }
+
+  /* ---------- site content wrapper (crossfades out when portfolio opens) ---------- */
+  #site-content{
+    transition:opacity .45s ease, visibility 0s linear 0s;
+    opacity:1; visibility:visible;
+  }
+  #site-content.is-hidden{
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .45s ease, visibility 0s linear .45s;
+  }
+  body.portfolio-open{ overflow:hidden; }
+
+  /* ---------- portfolio overlay: scrollable one-page portfolio ---------- */
+  .portfolio-overlay{
+    position:fixed; inset:0; z-index:70; background:var(--ink);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .45s ease, visibility 0s linear .45s;
+  }
+  .portfolio-overlay.is-visible{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity .45s ease, visibility 0s linear 0s;
+  }
+  .portfolio-scroll{
+    width:100%; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:var(--ink);
+  }
+  .portfolio-scroll img{
+    display:block; width:100%; height:auto;
+  }
+  .portfolio-back{
+    position:fixed; top:22px; right:clamp(16px,5vw,48px); z-index:80;
+    display:inline-flex; align-items:center; gap:8px;
+    border:1px solid var(--line-strong); padding:11px 22px;
+    font-family:var(--body); font-weight:600; font-size:12px;
+    letter-spacing:.16em; text-transform:uppercase;
+    color:var(--paper); background:rgba(10,10,10,.6); backdrop-filter:blur(8px);
+    cursor:pointer; transition:background .3s ease, color .3s ease;
+  }
+  .portfolio-back:hover{ background:var(--paper); color:var(--ink); }
+
+  /* ---------- about overlay: simple text page ---------- */
+  .about-overlay{
+    position:fixed; inset:0; z-index:70; background:var(--ink);
+    opacity:0; visibility:hidden; pointer-events:none;
+    transition:opacity .45s ease, visibility 0s linear .45s;
+  }
+  .about-overlay.is-visible{
+    opacity:1; visibility:visible; pointer-events:auto;
+    transition:opacity .45s ease, visibility 0s linear 0s;
+  }
+  .about-scroll{
+    width:100%; height:100%; overflow-y:auto; -webkit-overflow-scrolling:touch;
+    background:var(--ink);
+  }
+  .about-content{
+    max-width:720px; margin:0 auto;
+    padding:clamp(120px,18vw,160px) clamp(24px,8vw,60px) 100px;
+  }
+  .about-title{
+    font-family:var(--body); font-weight:600; text-transform:uppercase;
+    letter-spacing:.16em; font-size:clamp(1.6rem,4vw,2.4rem);
+    color:var(--paper); margin-bottom:36px;
+  }
+  .about-text{
+    font-family:var(--body); font-size:16px; line-height:1.85;
+    color:var(--paper-dim);
+  }
+  .about-text p{ margin-bottom:1.4em; }
+  .about-text p:last-child{ margin-bottom:0; }
+
+  /* ---------- shop: product grid (reuses .portfolio-overlay / .about-content skeleton) ---------- */
+  .shop-grid{
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+    gap:26px; margin-top:44px;
+  }
+  .product-card{
+    display:flex; flex-direction:column;
+    border:1px solid var(--line); background:var(--ink-2);
+    transition:border-color .25s ease;
+  }
+  .product-card:hover{ border-color:var(--line-strong); }
+  .product-media{
+    position:relative; aspect-ratio:4/5; overflow:hidden;
+    display:flex; align-items:center; justify-content:center;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-blend-mode:overlay;
+  }
+  .product-media .num{
+    font-family:var(--display); font-style:normal; font-weight:600;
+    font-size:2.6rem; color:rgba(245,245,243,.16); letter-spacing:-.02em;
+  }
+  .product-body{ padding:20px 22px 22px; display:flex; flex-direction:column; gap:6px; flex:1; }
+  .product-badge{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+  .product-name{ font-family:var(--body); font-weight:600; font-size:16px; color:var(--paper); }
+  .product-medium{ font-size:12px; color:var(--paper-dim); }
+  .product-price{ margin-top:auto; padding-top:14px; font-size:14px; color:var(--paper); letter-spacing:.02em; }
+  .product-btn{
+    margin-top:12px; display:block; text-align:center; text-decoration:none;
+    border:1px solid var(--line-strong); background:none; color:var(--paper);
+    padding:13px; font-family:var(--body); font-size:11px; letter-spacing:.14em;
+    text-transform:uppercase; cursor:pointer; transition:background .25s ease, color .25s ease;
+  }
+  .product-btn:hover{ background:var(--paper); color:var(--ink); }
+
+  /* ---------- product detail page ---------- */
+  .product-media{ cursor:pointer; }
+  .product-card{ cursor:pointer; }
+  .pdp{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:44px; margin-top:34px; align-items:start; }
+  .pdp-media{
+    position:relative; aspect-ratio:4/5; border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .pdp-media .num{ font-size:4rem; font-weight:600; color:rgba(245,245,243,.16); }
+  .pdp-badge{ font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); }
+  .pdp-title{ font-family:var(--display); font-size:clamp(28px,4vw,44px); font-weight:600; margin:10px 0 6px; }
+  .pdp-medium{ font-size:13px; color:var(--paper-dim); }
+  .pdp-price{ margin:22px 0 4px; font-size:26px; }
+  .pdp-note{ font-size:12px; color:var(--paper-dim); }
+  .pdp-desc{ margin-top:20px; font-size:15px; line-height:1.7; color:var(--paper-dim); }
+  .pdp-label{ margin-top:28px; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--paper-dim); }
+  .size-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; margin-top:12px; }
+  .size-opt{
+    border:1px solid var(--line-strong); background:none; color:var(--paper);
+    padding:13px 14px; text-align:left; cursor:pointer; font-family:var(--body);
+    display:flex; justify-content:space-between; align-items:center; gap:10px;
+    transition:background .2s ease, color .2s ease;
+  }
+  .size-opt small{ display:block; font-size:11px; color:var(--paper-dim); letter-spacing:.06em; margin-top:3px; }
+  .size-opt:hover{ border-color:var(--paper); }
+  .size-opt.is-selected{ background:var(--paper); color:var(--ink); }
+  .size-opt.is-selected small{ color:rgba(10,10,10,.6); }
+  .pdp-actions{ display:flex; flex-wrap:wrap; gap:12px; margin-top:26px; }
+  .pdp-btn{
+    flex:1; min-width:170px; border:1px solid var(--line-strong); background:none; color:var(--paper);
+    padding:15px; font-family:var(--body); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+    cursor:pointer; text-align:center; transition:background .25s ease, color .25s ease;
+  }
+  .pdp-btn:hover{ background:var(--paper); color:var(--ink); }
+  .pdp-btn.primary{ background:var(--paper); color:var(--ink); }
+  .pdp-btn.primary:hover{ opacity:.85; }
+  .pdp-msg{ margin-top:14px; font-size:13px; color:var(--gold); min-height:18px; }
+  @media (max-width:760px){
+    .pdp{ grid-template-columns:1fr; gap:26px; }
+  }
+
+  /* ---------- cart ---------- */
+  .cart-empty{ color:var(--paper-dim); font-size:15px; padding:20px 0 8px; }
+  .cart-item{
+    display:flex; align-items:center; gap:16px;
+    padding:20px 0; border-bottom:1px solid var(--line);
+  }
+  .cart-item-media{
+    width:60px; height:60px; flex-shrink:0; border:1px solid var(--line);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-blend-mode:overlay;
+  }
+  .cart-item-info{ flex:1; min-width:0; }
+  .cart-item-name{ font-family:var(--body); font-weight:600; font-size:14px; color:var(--paper); }
+  .cart-item-meta{ font-size:12px; color:var(--paper-dim); margin-top:3px; }
+  .cart-item-remove{
+    margin-top:8px; background:none; border:none; padding:0; cursor:pointer;
+    font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--paper-dim);
+    font-family:var(--body); transition:color .25s ease;
+  }
+  .cart-item-remove:hover{ color:var(--paper); }
+  .cart-qty{ display:flex; align-items:center; gap:12px; flex-shrink:0; }
+  .cart-qty button{
+    width:26px; height:26px; border:1px solid var(--line-strong); background:none;
+    color:var(--paper); cursor:pointer; font-size:14px; line-height:1;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .25s ease, color .25s ease;
+  }
+  .cart-qty button:hover{ background:var(--paper); color:var(--ink); }
+  .cart-qty span{ font-size:14px; min-width:14px; text-align:center; }
+  .cart-summary{ margin-top:8px; padding-top:28px; border-top:1px solid var(--line-strong); }
+  .cart-summary.is-hidden{ display:none; }
+  .cart-subtotal{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--body); font-size:14px; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--paper); margin-bottom:20px;
+  }
+  .cart-subtotal span:last-child{ font-size:18px; letter-spacing:0; text-transform:none; }
+  .checkout-btn{
+    width:100%; background:var(--paper); color:var(--ink); border:none;
+    padding:16px 20px; font-family:var(--body); font-size:12px; letter-spacing:.14em;
+    text-transform:uppercase; cursor:pointer; transition:opacity .25s ease;
+  }
+  .checkout-btn:hover{ opacity:.85; }
+  .checkout-btn:disabled{ opacity:.5; cursor:not-allowed; }
+  .cart-status-msg{ text-align:center; font-size:13px; color:var(--paper-dim); margin-top:16px; min-height:18px; }
+  .cart-status-msg.success{ color:var(--gold); }
+  .cart-status-msg.error{ color:#e08a7a; }
+
+  /* ---------- footer ---------- */
+  footer{
+    border-top:1px solid var(--line);
+    padding:40px clamp(20px,6vw,60px);
+    display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:20px;
+  }
+  footer .foot-email{ font-size:13px; color:var(--paper-dim); border-bottom:1px solid transparent; }
+  footer .foot-email:hover{ border-color:var(--line-strong); }
+  .social{ display:flex; align-items:center; gap:18px; }
+  .social a{ color:var(--paper-dim); transition:color .25s ease; display:flex; align-items:center; }
+  .social a:hover{ color:var(--gold); }
+  .social svg{ width:20px; height:20px; display:block; }
+  footer .copyright{ font-size:11px; color:var(--paper-dim); letter-spacing:.04em; }
+
+  @media (max-width:760px){
+    .preview-grid{ grid-template-columns:1fr 1fr; }
+    .countdown{ gap:18px; }
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    *{ animation-duration:.001s !important; transition-duration:.001s !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<div id="site-content">
+
+<header>
+  <button class="menu-toggle" aria-label="Menu" aria-expanded="false">
+    <span class="bar bar1"></span>
+    <span class="bar bar2"></span>
+    <span class="bar bar3"></span>
+  </button>
+  <div class="brand">
+    <img src="/images/img-1.png" alt="Logo" class="brand-logo">
+  </div>
+  <nav class="links">
+    <a href="#" class="active">Home</a>
+    <a href="#about" id="nav-about-link">About</a>
+    <a class="cart" href="#" id="nav-cart-link">🛒 <span id="cart-count">0</span></a>
+  </nav>
+  <div class="header-actions">
+    <button type="button" class="contact-btn" id="contact-btn">Contact</button> <!-- EDIT: contact email -->
+  </div>
+</header>
+
+<section class="hero">
+  <canvas class="hero-particles" id="hero-particles"></canvas>
+
+  <div class="hero-content" id="hero-content">
+    <h1 class="headline" id="site-headline">HN<br>STUDIOS</h1>
+    <p class="hero-tagline" id="site-tagline">Original Artworks, Fine Prints &amp; Portfolio</p>
+  </div>
+
+  <div class="contact-panel" id="contact-panel">
+    <button type="button" class="back-to-hero" id="back-to-hero">&larr; Back</button>
+    <h2>Contact</h2> <!-- EDIT: copy -->
+    <p class="sub">Leave your name and details below and we'll get back to you as soon as we can.</p> <!-- EDIT: copy -->
+
+    <form id="contact-form" action="https://formsubmit.co/hardiknehere25@gmail.com" method="POST" data-default-email="hardiknehere25@gmail.com">
+      <!-- EDIT: your email — replace hardiknehere25@gmail.com above with the address you want submissions sent to -->
+      <input type="hidden" name="_subject" value="New enquiry from website contact form">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <input type="text" name="_honey" style="display:none">
+
+      <div class="field">
+        <label for="name">Name</label>
+        <input type="text" id="name" name="Name" placeholder="Your full name" required>
+      </div>
+
+      <div class="field">
+        <label for="phone">Phone Number</label>
+        <input type="tel" id="phone" name="Phone" placeholder="Your phone number" required>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="Email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="field">
+        <label for="message">Message <span style="opacity:.6">(optional)</span></label>
+        <textarea id="message" name="Message" placeholder="Tell us a bit about what you're after..."></textarea>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submit-btn">Send</button>
+      <p class="status-msg" id="status-msg"></p>
+    </form>
+  </div>
+</section>
+
+<section class="portfolio-cta">
+  <button type="button" class="portfolio-btn" id="portfolio-open-btn">
+    <span>Portfolio</span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="7" y1="17" x2="17" y2="7"></line>
+      <polyline points="7 7 17 7 17 17"></polyline>
+    </svg>
+  </button>
+  <button type="button" class="portfolio-btn" id="shop-open-btn">
+    <span>Purchase</span>
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="9" cy="21" r="1"></circle>
+      <circle cx="20" cy="21" r="1"></circle>
+      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+    </svg>
+  </button>
+</section>
+
+<section class="explore" id="preview">
+  <h2 class="explore-title">Explore Works</h2>
+  <p class="explore-hint">Tap through the collection — press &amp; hold to pause</p>
+
+  <div class="stack-outer">
+    <div class="stack-peek peek-2"></div>
+    <div class="stack-peek peek-1"></div>
+
+    <div class="story-stack" id="story-stack" role="button" tabindex="0" aria-label="Explore artworks — tap to advance, hold to pause">
+      <div class="story-track" id="story-track">
+        <!-- EDIT: swap each .story-media background/gradient for <img src="your-artwork.jpg" style="width:100%;height:100%;object-fit:cover"> -->
+        <div class="story-card is-active">
+          <div class="story-media" style="background:radial-gradient(ellipse at 30% 20%, #2c2c2c, #050505 70%)"><span class="num">I</span></div>
+          <div class="story-caption">
+            <span class="story-num">01 — Original</span>
+            <span class="story-name">Ash &amp; Ember</span>
+            <span class="story-medium">Oil on canvas, 24×30in</span>
+          </div>
+        </div>
+        <div class="story-card">
+          <div class="story-media" style="background:linear-gradient(150deg, #1c1c1c, #3a3a3a 60%, #0a0a0a)"><span class="num">II</span></div>
+          <div class="story-caption">
+            <span class="story-num">02 — Print</span>
+            <span class="story-name">Quiet Static</span>
+            <span class="story-medium">Fine art print, ltd. edition</span>
+          </div>
+        </div>
+        <div class="story-card">
+          <div class="story-media" style="background:radial-gradient(circle at 70% 75%, #303030, #050505 65%)"><span class="num">III</span></div>
+          <div class="story-caption">
+            <span class="story-num">03 — Original</span>
+            <span class="story-name">Faultlines</span>
+            <span class="story-medium">Mixed media, 18×24in</span>
+          </div>
+        </div>
+        <div class="story-card">
+          <div class="story-media" style="background:linear-gradient(200deg, #050505, #2a2a2a 55%, #111)"><span class="num">IV</span></div>
+          <div class="story-caption">
+            <span class="story-num">04 — Print</span>
+            <span class="story-name">Vellum</span>
+            <span class="story-medium">Fine art print, ltd. edition</span>
+          </div>
+        </div>
+        <div class="story-card">
+          <div class="story-media" style="background:radial-gradient(ellipse at 60% 30%, #262626, #000 70%)"><span class="num">V</span></div>
+          <div class="story-caption">
+            <span class="story-num">05 — Original</span>
+            <span class="story-name">Undertow</span>
+            <span class="story-medium">Acrylic on canvas, 30×40in</span>
+          </div>
+        </div>
+        <div class="story-card">
+          <div class="story-media" style="background:linear-gradient(135deg, #111, #333 50%, #050505)"><span class="num">VI</span></div>
+          <div class="story-caption">
+            <span class="story-num">06 — Print</span>
+            <span class="story-name">Afterimage</span>
+            <span class="story-medium">Fine art print, ltd. edition</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <a class="foot-email" id="foot-email" href="mailto:hardiknehere25@gmail.com">hardiknehere25@gmail.com</a> <!-- EDIT -->
+  <div class="social">
+    <a href="#" id="instagram-link" aria-label="Instagram"> <!-- EDIT: your Instagram link -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="5" ry="5"></rect>
+        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+      </svg>
+    </a>
+  </div>
+  <p class="copyright">© <span id="year"></span> <span id="brand-name-footer">HN Studios</span>. All rights reserved.</p> <!-- EDIT -->
+</footer>
+
+</div><!-- /#site-content -->
+
+<div class="portfolio-overlay" id="portfolio-overlay" aria-hidden="true">
+  <button type="button" class="portfolio-back" id="portfolio-back" aria-label="Back to website">
+    <span>Back</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  </button>
+  <div class="portfolio-scroll" id="portfolio-scroll">
+    <!-- EDIT: these are the pages of HARDIK_PORTFOLIO.pdf rendered as images so they can scroll like one long page -->
+    <img src="/images/img-2.jpg" alt="Hardik Nehere portfolio, page 1 of 17" loading="eager">
+    <img src="/images/img-3.jpg" alt="Hardik Nehere portfolio, page 2 of 17" loading="eager">
+    <img src="/images/img-4.jpg" alt="Hardik Nehere portfolio, page 3 of 17" loading="lazy">
+    <img src="/images/img-5.jpg" alt="Hardik Nehere portfolio, page 4 of 17" loading="lazy">
+    <img src="/images/img-6.jpg" alt="Hardik Nehere portfolio, page 5 of 17" loading="lazy">
+    <img src="/images/img-7.jpg" alt="Hardik Nehere portfolio, page 6 of 17" loading="lazy">
+    <img src="/images/img-8.jpg" alt="Hardik Nehere portfolio, page 7 of 17" loading="lazy">
+    <img src="/images/img-9.jpg" alt="Hardik Nehere portfolio, page 8 of 17" loading="lazy">
+    <img src="/images/img-10.jpg" alt="Hardik Nehere portfolio, page 9 of 17" loading="lazy">
+    <img src="/images/img-11.jpg" alt="Hardik Nehere portfolio, page 10 of 17" loading="lazy">
+    <img src="/images/img-12.jpg" alt="Hardik Nehere portfolio, page 11 of 17" loading="lazy">
+    <img src="/images/img-13.jpg" alt="Hardik Nehere portfolio, page 12 of 17" loading="lazy">
+    <img src="/images/img-14.jpg" alt="Hardik Nehere portfolio, page 13 of 17" loading="lazy">
+    <img src="/images/img-15.jpg" alt="Hardik Nehere portfolio, page 14 of 17" loading="lazy">
+    <img src="/images/img-16.jpg" alt="Hardik Nehere portfolio, page 15 of 17" loading="lazy">
+    <img src="/images/img-17.jpg" alt="Hardik Nehere portfolio, page 16 of 17" loading="lazy">
+    <img src="/images/img-18.jpg" alt="Hardik Nehere portfolio, page 17 of 17" loading="lazy">
+  </div>
+</div>
+
+<div class="about-overlay" id="about-overlay" aria-hidden="true">
+  <button type="button" class="portfolio-back" id="about-back" aria-label="Back to website">
+    <span>Back</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  </button>
+  <div class="about-scroll" id="about-scroll">
+    <div class="about-content">
+      <h2 class="about-title">About</h2>
+      <div class="about-text" id="about-text">
+        <!-- EDIT: replace this placeholder with your About paragraph(s) -->
+        <p>Your About text goes here — just send it over and it'll go right in this spot.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="portfolio-overlay" id="shop-overlay" aria-hidden="true">
+  <button type="button" class="portfolio-back" id="shop-back" aria-label="Back to website">
+    <span>Back</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  </button>
+  <div class="portfolio-scroll" id="shop-scroll">
+    <div class="about-content">
+      <h2 class="about-title">Shop</h2>
+      <div class="shop-grid" id="shop-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div class="portfolio-overlay" id="product-overlay" aria-hidden="true">
+  <button type="button" class="portfolio-back" id="product-back" aria-label="Back to shop">
+    <span>Back</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  </button>
+  <div class="portfolio-scroll" id="product-scroll">
+    <div class="about-content">
+      <div class="pdp" id="pdp"></div>
+    </div>
+  </div>
+</div>
+
+<div class="portfolio-overlay" id="cart-overlay" aria-hidden="true">
+  <button type="button" class="portfolio-back" id="cart-back" aria-label="Back to website">
+    <span>Back</span>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="19" y1="12" x2="5" y2="12"></line>
+      <polyline points="12 19 5 12 12 5"></polyline>
+    </svg>
+  </button>
+  <div class="portfolio-scroll" id="cart-scroll">
+    <div class="about-content">
+      <h2 class="about-title">Your Cart</h2>
+      <div id="cart-items"></div>
+      <div class="cart-summary" id="cart-summary">
+        <div class="cart-subtotal">
+          <span>Subtotal</span>
+          <span id="cart-subtotal-amount">$0.00</span>
+        </div>
+        <button type="button" class="checkout-btn" id="checkout-btn">Checkout</button>
+        <p class="cart-status-msg" id="checkout-status"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---------- hero background: slow drifting dust/powder particles ---------- */
+  (function(){
+    const canvas = document.getElementById('hero-particles');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const hero = canvas.parentElement;
+    let w = 0, h = 0, dpr = 1, particles = [];
+
+    function resize(){
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      w = hero.clientWidth;
+      h = hero.clientHeight;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      initParticles();
+    }
+
+    function initParticles(){
+      const count = Math.min(750, Math.max(320, Math.round((w * h) / 1500)));
+      const overscan = 24; // draw slightly past the edges so there's never a visible seam/boundary
+      particles = new Array(count).fill(0).map(() => ({
+        x: -overscan + Math.random() * (w + overscan * 2),
+        y: -overscan + Math.random() * (h + overscan * 2),
+        r: 0.35 + Math.random() * 0.9,
+        a: 0.12 + Math.random() * 0.34,
+        // gentle, slow individual drift — no shared direction, just quiet ambient motion
+        driftX: (Math.random() - 0.5) * 0.035,
+        driftY: (Math.random() - 0.5) * 0.035,
+        // slow sway so motion feels organic rather than linear
+        swayAmp: 3 + Math.random() * 7,
+        swaySpeed: 0.04 + Math.random() * 0.06,
+        swayPhase: Math.random() * Math.PI * 2,
+        baseX: 0,
+        baseY: 0
+      }));
+      particles.forEach(p => { p.baseX = p.x; p.baseY = p.y; });
+    }
+
+    let t = 0;
+    const OVERSCAN = 24;
+
+    function frame(){
+      t += 0.016;
+      ctx.clearRect(0, 0, w, h);
+
+      for (const p of particles){
+        p.baseX += p.driftX;
+        p.baseY += p.driftY;
+
+        if (p.baseX < -OVERSCAN - 10) p.baseX = w + OVERSCAN; else if (p.baseX > w + OVERSCAN + 10) p.baseX = -OVERSCAN;
+        if (p.baseY < -OVERSCAN - 10) p.baseY = h + OVERSCAN; else if (p.baseY > h + OVERSCAN + 10) p.baseY = -OVERSCAN;
+
+        p.x = p.baseX + Math.sin(t * p.swaySpeed + p.swayPhase) * p.swayAmp;
+        p.y = p.baseY + Math.cos(t * p.swaySpeed * 0.8 + p.swayPhase) * p.swayAmp * 0.6;
+
+        ctx.globalAlpha = p.a;
+        ctx.fillStyle = '#e6ddc8';
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(frame);
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+    requestAnimationFrame(frame);
+  })();
+
+  /* ---------- overlays: simple crossfade open/close (portfolio + about) ---------- */
+  (function(){
+    const siteContent = document.getElementById('site-content');
+    if (!siteContent) return;
+
+    const FADE_MS = 450; // keep in sync with the CSS transition duration
+    let transitioning = false;
+    let activeOverlay = null;
+
+    const overlays = {
+      portfolio: {
+        el: document.getElementById('portfolio-overlay'),
+        openBtn: document.getElementById('portfolio-open-btn'),
+        backBtn: document.getElementById('portfolio-back'),
+        scrollEl: document.getElementById('portfolio-scroll')
+      },
+      about: {
+        el: document.getElementById('about-overlay'),
+        openBtn: document.getElementById('nav-about-link'),
+        backBtn: document.getElementById('about-back'),
+        scrollEl: document.getElementById('about-scroll')
+      },
+      shop: {
+        el: document.getElementById('shop-overlay'),
+        openBtn: document.getElementById('shop-open-btn'),
+        backBtn: document.getElementById('shop-back'),
+        scrollEl: document.getElementById('shop-scroll')
+      },
+      product: {
+        el: document.getElementById('product-overlay'),
+        openBtn: null,
+        backBtn: document.getElementById('product-back'),
+        scrollEl: document.getElementById('product-scroll')
+      },
+      cart: {
+        el: document.getElementById('cart-overlay'),
+        openBtn: document.getElementById('nav-cart-link'),
+        backBtn: document.getElementById('cart-back'),
+        scrollEl: document.getElementById('cart-scroll')
+      }
+    };
+
+    function openOverlay(key){
+      const o = overlays[key];
+      if (!o || !o.el || transitioning) return;
+      transitioning = true;
+      activeOverlay = key;
+      document.body.classList.add('portfolio-open');
+
+      siteContent.classList.add('is-hidden');
+      o.el.classList.add('is-visible');
+      o.el.setAttribute('aria-hidden', 'false');
+      if (o.scrollEl) o.scrollEl.scrollTop = 0;
+
+      setTimeout(() => {
+        transitioning = false;
+        o.backBtn?.focus();
+      }, FADE_MS);
+    }
+
+    function closeOverlay(){
+      const o = overlays[activeOverlay];
+      if (!o || !o.el || transitioning) return;
+      transitioning = true;
+
+      o.el.classList.remove('is-visible');
+      o.el.setAttribute('aria-hidden', 'true');
+      siteContent.classList.remove('is-hidden');
+
+      setTimeout(() => {
+        transitioning = false;
+        document.body.classList.remove('portfolio-open');
+        o.openBtn?.focus();
+        activeOverlay = null;
+      }, FADE_MS);
+    }
+
+    Object.keys(overlays).forEach((key) => {
+      const o = overlays[key];
+      if (!o.el || !o.openBtn || !o.backBtn) return;
+      o.openBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openOverlay(key);
+      });
+      o.backBtn.addEventListener('click', closeOverlay);
+    });
+
+    document.getElementById('product-back')?.addEventListener('click', () => {
+      closeOverlay();
+      setTimeout(() => openOverlay('shop'), FADE_MS + 20);
+    });
+
+    window.openOverlay = openOverlay;
+    window.closeOverlay = closeOverlay;
+    window.switchOverlay = (key) => {
+      closeOverlay();
+      setTimeout(() => openOverlay(key), FADE_MS + 20);
+    };
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activeOverlay) closeOverlay();
+    });
+  })();
+
+
+  /* ---------- contact panel toggle (same page, no navigation) ---------- */
+  const contactBtn = document.getElementById('contact-btn');
+  const heroContent = document.getElementById('hero-content');
+  const contactPanel = document.getElementById('contact-panel');
+  const backToHero = document.getElementById('back-to-hero');
+
+  const previewSection = document.getElementById('preview');
+
+  function showContact(){
+    heroContent.classList.add('is-hidden');
+    contactPanel.classList.add('is-visible');
+    if (previewSection) previewSection.style.display = 'none';
+  }
+  function showHero(){
+    contactPanel.classList.remove('is-visible');
+    heroContent.classList.remove('is-hidden');
+    if (previewSection) previewSection.style.display = '';
+  }
+
+  contactBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    showContact();
+  });
+  backToHero?.addEventListener('click', () => {
+    showHero();
+  });
+
+  const contactForm = document.getElementById('contact-form');
+  const submitBtn = document.getElementById('submit-btn');
+  const statusMsg = document.getElementById('status-msg');
+
+  contactForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending...';
+    statusMsg.textContent = '';
+    statusMsg.className = 'status-msg';
+
+    try {
+      const res = await fetch(contactForm.action, {
+        method: 'POST',
+        body: new FormData(contactForm),
+        headers: { 'Accept': 'application/json' }
+      });
+
+      if (res.ok) {
+        contactForm.reset();
+        statusMsg.textContent = 'Thanks — your message has been sent. We\'ll be in touch soon.';
+        statusMsg.classList.add('success');
+        submitBtn.textContent = 'Sent ✓';
+      } else {
+        throw new Error('Request failed');
+      }
+    } catch (err) {
+      statusMsg.textContent = 'Something went wrong. Please email us directly instead.';
+      statusMsg.classList.add('error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send';
+    }
+  });
+
+  /* ---------- explore works: story-stack behaviour ---------- */
+  (function(){
+    const stack = document.getElementById('story-stack');
+    const track = document.getElementById('story-track');
+    if (!stack || !track) return;
+
+    const DURATION_MS = 6000; // how long each artwork stays on screen — bump this up if you want slower cycling
+    const ROMAN = ['I','II','III','IV','V','VI','VII','VIII','IX','X'];
+
+    let cards = [];
+    let current = 0;
+    let paused = false;
+    let pressStart = 0;
+    let pressed = false;
+    let timer = null;
+
+    // Rebuilds the story cards from the live product list (falls back to whatever is
+    // already in the HTML, e.g. while the API request is still in flight).
+    window.__renderStoryStack__ = function(products){
+      if (!Array.isArray(products) || !products.length) return;
+      track.innerHTML = products.map((p, i) => `
+        <div class="story-card${i === 0 ? ' is-active' : ''}">
+          <div class="story-media" style="background:${p.bg}"><span class="num">${p.num || ROMAN[i] || (i+1)}</span></div>
+          <div class="story-caption">
+            <span class="story-num">${String(i+1).padStart(2,'0')} — ${p.type}</span>
+            <span class="story-name">${p.name}</span>
+            <span class="story-medium">${p.medium}</span>
+          </div>
+        </div>
+      `).join('');
+      cards = Array.from(track.querySelectorAll('.story-card'));
+      current = 0;
+      render();
+      scheduleNext();
+    };
+
+    cards = Array.from(track.querySelectorAll('.story-card'));
+    if (!cards.length) return;
+
+    function render(){
+      cards.forEach((c, i) => c.classList.toggle('is-active', i === current));
+    }
+
+    function goTo(i){
+      current = (i + cards.length) % cards.length;
+      render();
+    }
+    function next(){ goTo(current + 1); }
+    function prev(){ goTo(current - 1); }
+
+    function clearTimer(){
+      if (timer){ clearTimeout(timer); timer = null; }
+    }
+    function scheduleNext(){
+      clearTimer();
+      timer = setTimeout(() => {
+        if (!paused) next();
+        scheduleNext();
+      }, DURATION_MS);
+    }
+
+    function setPaused(p){
+      paused = p;
+      stack.classList.toggle('is-paused', p);
+    }
+
+    stack.addEventListener('pointerdown', (e) => {
+      pressed = true;
+      pressStart = Date.now();
+      setPaused(true);
+    });
+    stack.addEventListener('pointerup', (e) => {
+      if (!pressed) return;
+      pressed = false;
+      const heldFor = Date.now() - pressStart;
+      setPaused(false);
+      // a quick tap changes the card; a longer hold just pauses/resumes in place
+      if (heldFor < 300){
+        const rect = stack.getBoundingClientRect();
+        const relX = (e.clientX - rect.left) / rect.width;
+        if (relX < 0.35) prev(); else next();
+        scheduleNext();
+      }
+    });
+    stack.addEventListener('pointerleave', () => {
+      if (pressed){ pressed = false; setPaused(false); }
+    });
+    stack.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'Enter'){ e.preventDefault(); next(); scheduleNext(); }
+      if (e.key === 'ArrowLeft'){ e.preventDefault(); prev(); scheduleNext(); }
+    });
+    stack.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    render();
+    scheduleNext();
+  })();
+
+  /* ---------- site content: loaded from the backend admin API ---------- */
+  (function(){
+    fetch('/api/site')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(site => {
+        if (!site) return;
+        const headlineEl = document.getElementById('site-headline');
+        if (headlineEl && site.headline_html) headlineEl.innerHTML = site.headline_html;
+        const taglineEl = document.getElementById('site-tagline');
+        if (taglineEl && site.tagline) taglineEl.textContent = site.tagline;
+        const aboutEl = document.getElementById('about-text');
+        if (aboutEl && site.about_html) aboutEl.innerHTML = site.about_html;
+        const footEmail = document.getElementById('foot-email');
+        if (footEmail && site.contact_email) {
+          footEmail.textContent = site.contact_email;
+          footEmail.href = 'mailto:' + site.contact_email;
+        }
+        const igLink = document.getElementById('instagram-link');
+        if (igLink && site.instagram_url) igLink.href = site.instagram_url;
+        const brandFoot = document.getElementById('brand-name-footer');
+        if (brandFoot && site.brand_name) brandFoot.textContent = site.brand_name;
+        const contactForm = document.getElementById('contact-form');
+        if (contactForm && site.contact_email) {
+          contactForm.action = 'https://formsubmit.co/' + site.contact_email;
+        }
+        window.__SITE_SETTINGS__ = site;
+      })
+      .catch(() => { /* fall back to the defaults already in the page */ });
+  })();
+
+  /* ---------- shop + cart ---------- */
+  (function(){
+    // Product catalogue and site settings now live in the admin database — see /admin.
+    let PRODUCTS = [];
+    // EDIT: print sizes — multiplier is applied to the product's base (A4) price
+    const SIZES = [
+      { id:'A4', label:'A4', dims:'210 × 297 mm', mult:1 },
+      { id:'A3', label:'A3', dims:'297 × 420 mm', mult:1.6 },
+      { id:'A2', label:'A2', dims:'420 × 594 mm', mult:2.4 },
+      { id:'A1', label:'A1', dims:'594 × 841 mm', mult:3.4 }
+    ];
+    const CART_KEY = 'hn_cart';
+    let CHECKOUT_EMAIL = 'hardiknehere25@gmail.com'; // overwritten once /api/site loads
+
+    const priceFor = (p, sizeId) => {
+      const s = SIZES.find(x => x.id === sizeId) || SIZES[0];
+      return Math.round(p.price * s.mult);
+    };
+
+    function getCart(){
+      try {
+        const raw = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+        // migrate older cart entries that had no size
+        return raw.map(i => i.pid ? i : { key: i.id + '|A4', pid: i.id, size:'A4', qty: i.qty || 1 });
+      } catch (e) { return []; }
+    }
+    function saveCart(cart){
+      localStorage.setItem(CART_KEY, JSON.stringify(cart));
+      updateCartCount();
+    }
+    function updateCartCount(){
+      const el = document.getElementById('cart-count');
+      if (!el) return;
+      el.textContent = getCart().reduce((sum, i) => sum + i.qty, 0);
+    }
+    function addToCart(pid, size){
+      const cart = getCart();
+      const key = pid + '|' + size;
+      const existing = cart.find(i => i.key === key);
+      if (existing) existing.qty += 1;
+      else cart.push({ key, pid, size, qty: 1 });
+      saveCart(cart);
+    }
+    function changeQty(key, delta){
+      let cart = getCart();
+      const item = cart.find(i => i.key === key);
+      if (!item) return;
+      item.qty += delta;
+      cart = item.qty <= 0 ? cart.filter(i => i.key !== key) : cart;
+      saveCart(cart);
+      renderCart();
+    }
+    function removeFromCart(key){
+      saveCart(getCart().filter(i => i.key !== key));
+      renderCart();
+    }
+
+    function renderShop(){
+      const grid = document.getElementById('shop-grid');
+      if (!grid) return;
+      grid.innerHTML = PRODUCTS.map(p => `
+        <div class="product-card" data-id="${p.id}" role="button" tabindex="0">
+          <div class="product-media" style="background:${p.bg}"><span class="num">${p.num}</span></div>
+          <div class="product-body">
+            <span class="product-badge">${p.type}</span>
+            <span class="product-name">${p.name}</span>
+            <span class="product-medium">${p.medium}</span>
+            ${p.type === 'Print'
+              ? `<span class="product-price">From $${p.price.toFixed(2)}</span>
+                 <button type="button" class="product-btn view-btn" data-id="${p.id}">View Product</button>`
+              : `<span class="product-price">One of a kind</span>
+                 <button type="button" class="product-btn view-btn" data-id="${p.id}">View Product</button>`
+            }
+          </div>
+        </div>
+      `).join('');
+
+      grid.querySelectorAll('.product-card').forEach(card => {
+        const open = () => openProduct(card.dataset.id);
+        card.addEventListener('click', open);
+        card.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); }
+        });
+      });
+    }
+
+    /* ---------- product detail page ---------- */
+    let pdpProduct = null;
+    let pdpSize = 'A4';
+
+    function renderPdp(){
+      const el = document.getElementById('pdp');
+      const p = pdpProduct;
+      if (!el || !p) return;
+      const isPrint = p.type === 'Print';
+      el.innerHTML = `
+        <div class="pdp-media" style="background:${p.bg}"><span class="num">${p.num}</span></div>
+        <div class="pdp-info">
+          <span class="pdp-badge">${p.type}</span>
+          <h2 class="pdp-title">${p.name}</h2>
+          <span class="pdp-medium">${p.medium}</span>
+          ${isPrint ? `
+            <div class="pdp-price" id="pdp-price">$${priceFor(p, pdpSize).toFixed(2)}</div>
+            <p class="pdp-note">Signed, museum-quality giclée print. Ships worldwide in 3–5 working days.</p>
+            <p class="pdp-label">Choose a size</p>
+            <div class="size-grid">
+              ${SIZES.map(s => `
+                <button type="button" class="size-opt${s.id === pdpSize ? ' is-selected' : ''}" data-size="${s.id}">
+                  <span>${s.label}<small>${s.dims}</small></span>
+                  <span>$${priceFor(p, s.id).toFixed(2)}</span>
+                </button>
+              `).join('')}
+            </div>
+            <div class="pdp-actions">
+              <button type="button" class="pdp-btn" id="pdp-add">Add to Cart</button>
+              <button type="button" class="pdp-btn primary" id="pdp-buy">Buy Print</button>
+            </div>
+            <p class="pdp-msg" id="pdp-msg"></p>
+          ` : `
+            <div class="pdp-price">One of a kind</div>
+            <p class="pdp-note">Original artwork — available to purchase directly from the studio.</p>
+            <div class="pdp-actions">
+              <a class="pdp-btn primary" href="mailto:${CHECKOUT_EMAIL}?subject=${encodeURIComponent('Inquiry about ' + p.name)}">Inquire</a>
+            </div>
+          `}
+          <p class="pdp-desc">Part of the studio collection — each piece is finished by hand and inspected before it leaves the studio.</p>
+        </div>
+      `;
+
+      el.querySelectorAll('.size-opt').forEach(btn => {
+        btn.addEventListener('click', () => { pdpSize = btn.dataset.size; renderPdp(); });
+      });
+
+      const msg = el.querySelector('#pdp-msg');
+      el.querySelector('#pdp-add')?.addEventListener('click', () => {
+        addToCart(p.id, pdpSize);
+        if (msg) msg.textContent = `${p.name} (${pdpSize}) added to your cart.`;
+      });
+      el.querySelector('#pdp-buy')?.addEventListener('click', () => {
+        addToCart(p.id, pdpSize);
+        renderCart();
+        window.switchOverlay?.('cart');
+      });
+    }
+
+    function openProduct(id){
+      const p = PRODUCTS.find(pr => pr.id === id);
+      if (!p) return;
+      pdpProduct = p;
+      pdpSize = 'A4';
+      renderPdp();
+      window.switchOverlay?.('product');
+    }
+
+    function renderCart(){
+      const list = document.getElementById('cart-items');
+      const summary = document.getElementById('cart-summary');
+      if (!list) return;
+      const cart = getCart();
+
+      if (!cart.length){
+        list.innerHTML = '<p class="cart-empty">Your cart is empty — browse the shop to add a print.</p>';
+        if (summary) summary.classList.add('is-hidden');
+        return;
+      }
+      if (summary) summary.classList.remove('is-hidden');
+
+      let subtotal = 0;
+      list.innerHTML = cart.map(item => {
+        const p = PRODUCTS.find(pr => pr.id === item.pid);
+        if (!p || p.price == null) return '';
+        const unit = priceFor(p, item.size);
+        subtotal += unit * item.qty;
+        return `
+          <div class="cart-item">
+            <div class="cart-item-media" style="background:${p.bg}"></div>
+            <div class="cart-item-info">
+              <div class="cart-item-name">${p.name}</div>
+              <div class="cart-item-meta">${item.size} print — $${unit.toFixed(2)} each</div>
+              <button type="button" class="cart-item-remove" data-key="${item.key}">Remove</button>
+            </div>
+            <div class="cart-qty">
+              <button type="button" class="qty-minus" data-key="${item.key}" aria-label="Decrease quantity">&minus;</button>
+              <span>${item.qty}</span>
+              <button type="button" class="qty-plus" data-key="${item.key}" aria-label="Increase quantity">+</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const amountEl = document.getElementById('cart-subtotal-amount');
+      if (amountEl) amountEl.textContent = '$' + subtotal.toFixed(2);
+
+      list.querySelectorAll('.qty-plus').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.key, 1)));
+      list.querySelectorAll('.qty-minus').forEach(b => b.addEventListener('click', () => changeQty(b.dataset.key, -1)));
+      list.querySelectorAll('.cart-item-remove').forEach(b => b.addEventListener('click', () => removeFromCart(b.dataset.key)));
+    }
+
+    // re-render the cart every time it's opened, so quantities/totals are always current
+    document.getElementById('nav-cart-link')?.addEventListener('click', renderCart);
+
+    const checkoutBtn = document.getElementById('checkout-btn');
+    const checkoutStatus = document.getElementById('checkout-status');
+    checkoutBtn?.addEventListener('click', async () => {
+      const cart = getCart();
+      if (!cart.length) return;
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = 'Sending...';
+      checkoutStatus.textContent = '';
+      checkoutStatus.className = 'cart-status-msg';
+
+      let total = 0;
+      const lines = cart.map(item => {
+        const p = PRODUCTS.find(pr => pr.id === item.pid);
+        if (!p || p.price == null) return '';
+        const unit = priceFor(p, item.size);
+        total += unit * item.qty;
+        return `${p.name} (${item.size}) x${item.qty} — $${(unit * item.qty).toFixed(2)}`;
+      }).filter(Boolean).join('\n');
+
+      const fd = new FormData();
+      fd.append('_subject', 'New print order from website');
+      fd.append('_captcha', 'false');
+      fd.append('_template', 'table');
+      fd.append('Order', lines);
+      fd.append('Total', '$' + total.toFixed(2));
+
+      try {
+        const res = await fetch(`https://formsubmit.co/${CHECKOUT_EMAIL}`, {
+          method: 'POST',
+          body: fd,
+          headers: { 'Accept': 'application/json' }
+        });
+        if (res.ok){
+          saveCart([]);
+          renderCart();
+          checkoutStatus.textContent = 'Order sent — we\'ll follow up by email to arrange shipping and payment.';
+          checkoutStatus.classList.add('success');
+          checkoutBtn.textContent = 'Sent ✓';
+        } else {
+          throw new Error('Request failed');
+        }
+      } catch (err){
+        checkoutStatus.textContent = 'Something went wrong. Please email us directly instead.';
+        checkoutStatus.classList.add('error');
+        checkoutBtn.disabled = false;
+        checkoutBtn.textContent = 'Checkout';
+      }
+    });
+
+    function loadProducts(){
+      return fetch('/api/products')
+        .then(r => r.ok ? r.json() : Promise.reject())
+        .then(list => {
+          PRODUCTS = Array.isArray(list) ? list : [];
+          if (window.__SITE_SETTINGS__ && window.__SITE_SETTINGS__.contact_email) {
+            CHECKOUT_EMAIL = window.__SITE_SETTINGS__.contact_email;
+          }
+          renderShop();
+          window.__renderStoryStack__ && window.__renderStoryStack__(PRODUCTS);
+        })
+        .catch(() => {
+          // Backend unreachable — shop stays empty rather than showing stale hardcoded data.
+          renderShop();
+        });
+    }
+
+    window.__PRICE_FOR__ = priceFor;
+    loadProducts();
+    updateCartCount();
+  })();
+
+  /* mobile menu toggle + hamburger-to-X animation */
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navLinks = document.querySelector('nav.links');
+  menuToggle?.addEventListener('click', ()=>{
+    const isOpen = menuToggle.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+    if (isOpen){
+      const rect = menuToggle.getBoundingClientRect();
+      navLinks.style.display = 'flex';
+      navLinks.style.flexDirection = 'column';
+      navLinks.style.position = 'fixed';
+      navLinks.style.top = (rect.bottom + 14) + 'px';
+      navLinks.style.left = (rect.left + rect.width / 2) + 'px';
+      navLinks.style.transform = 'translateX(-50%)';
+      navLinks.style.right = 'auto';
+      navLinks.style.background = 'var(--ink-2)';
+      navLinks.style.padding = '20px';
+      navLinks.style.border = '1px solid var(--line)';
+    } else {
+      navLinks.style.display = 'none';
+    }
+  });
+  navLinks?.querySelectorAll('a').forEach((link) => {
+    link.addEventListener('click', () => {
+      menuToggle?.classList.remove('open');
+      menuToggle?.setAttribute('aria-expanded', 'false');
+      navLinks.style.display = 'none';
+    });
+  });
 
 
 
 
-CONTACT
+</script>
 
-HN STUDIOS
-ORIGINAL ARTWORKS, FINE PRINTS & PORTFOLIO
-PORTFOLIO
-
-PURCHASE
-
-EXPLORE WORKS
-Tap through the collection — press & hold to pause
-
-
-I
-01 — Original
-Ash & Ember
-Oil on canvas, 24×30in
-II
-02 — Print
-Quiet Static
-Fine art print, ltd. edition
-III
-03 — Original
-Faultlines
-Mixed media, 18×24in
-IV
-04 — Print
-Vellum
-Fine art print, ltd. edition
-V
-05 — Original
-Undertow
-Acrylic on canvas, 30×40in
-VI
-06 — Print
-Afterimage
-Fine art print, ltd. edition
-hardiknehere25@gmail.com
-
-© HN Studios. All rights reserved.
-BACK
-
-
-BACK
-
-ABOUT
-Your About text goes here — just send it over and it'll go right in this spot.
-BACK
-
-SHOP
-BACK
-
-
-BACK
-
-YOUR CART
-
-SUBTOTAL
-$0.00
-CHECKOUT
-
+</body>
+</html>
