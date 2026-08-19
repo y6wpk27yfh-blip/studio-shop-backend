@@ -10,7 +10,7 @@ const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change-me';
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'insecure-dev-secret-change-me';
 const TOKEN_TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
 
-app.use(express.json());
+app.use(express.json({ limit: '15mb' })); // raised to allow product photo uploads (stored as compressed base64)
 app.use(cookieParser());
 
 // ---------- tiny stateless auth (no session store needed) ----------
